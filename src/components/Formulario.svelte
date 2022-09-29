@@ -2,8 +2,11 @@
 
     import type IUsuario from "../Interfaces/IUsuario";
     import {createEventDispatcher} from "svelte";
+    import {buscaRepositorios, buscaUsuario} from "../requisicoes";
+    import montaUsuario from "../utils/montaUsuario";
+    import Botao from "./Botao.svelte";
 
-    let valorInput = '';
+    let valorInput = 'marinhomich';
 
     let statusDeErro: null | number = null
 
@@ -12,19 +15,15 @@
     }>();
 
     async function aoSubmeter() {
-        const respostaUsuario = await fetch(`https://api.github.com/users/${valorInput}`)
+        const respostaUsuario = await buscaUsuario(valorInput)
+        const respostaRepositorios = await buscaRepositorios(valorInput)
 
-        if (respostaUsuario.ok){
+
+        if (respostaUsuario.ok && respostaRepositorios.ok){
             const dadosUsuario = await respostaUsuario.json();
+            const dadosRepositorios = await respostaRepositorios.json();
 
-            dispatch('aoAlterarUsuario', {
-                avatar_url: dadosUsuario.avatar_url,
-                login: dadosUsuario.login,
-                nome: dadosUsuario.name,
-                perfil_url: dadosUsuario.html_url,
-                repositorios_publicos: dadosUsuario.public_repos,
-                seguidores: dadosUsuario.followers
-            });
+            dispatch('aoAlterarUsuario', montaUsuario(dadosUsuario, dadosRepositorios));
 
             statusDeErro = null
         } else {
@@ -40,9 +39,14 @@
         {#if statusDeErro  === 404}
             <span class="erro">Usuário não encontrado!</span>
         {/if}
+
         <div class="botao-container">
-            <button type="submit" class="botao" >Buscar</button>
+            <Botao>
+                Buscar
+                <img src="/assets/lupa.svg" alt="Ícone de Lupa"/>
+            </Botao>
         </div>
+
     </form>
 </div>
 
@@ -78,27 +82,6 @@
         top: 0;
         bottom: 0;
         display: flex;
-    }
-
-    .botao {
-        padding: 15px 24px;
-        border-radius: 8px;
-        border: none;
-        background: #2e80fa;
-        line-height: 26px;
-        color: #fff;
-        font-size: 22px;
-        cursor: pointer;
-
-        transition: background-color 0.2s;
-
-        display: flex;
-        align-items: center;
-        gap: 13px;
-    }
-
-    .botao:hover {
-        background: #4590ff;
     }
 
     .erro {

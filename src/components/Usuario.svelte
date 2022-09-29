@@ -3,6 +3,12 @@
     import type IUsuario from "../Interfaces/IUsuario";
 
     export let usuario: IUsuario;
+    let temRepositorios: Boolean;
+    $: {
+        temRepositorios  = Boolean(usuario.repositorios_recentes.length)
+        console.log(temRepositorios)
+    }
+
 </script>
 
 <div class="card-usuario">
@@ -29,6 +35,25 @@
                 Repositórios: <span>{usuario.repositorios_publicos}</span>
             </div>
         </div>
+        {#if temRepositorios}
+        <div class="repositorios">
+            <h2 class="titulo">Repositórios Recentes</h2>
+
+            <ul>
+                {#each usuario.repositorios_recentes as repositorio}
+                    <li>
+                        <a href={repositorio.url}
+                           target="_blank"
+                           rel="noopener"
+                           class="repositorio"
+                        >
+                            {repositorio.nome}
+                        </a>
+                    </li>
+                {/each}
+            </ul>
+        </div>
+            {/if}
     </div>
 </div>
 
@@ -73,5 +98,18 @@
     .detalhes-usuario > .info > span {
         color: #6781a8;
         font-weight: normal;
+    }
+
+    .repositorios > .titulo {
+        font-size: 20px;
+        line-height: 31px;
+        font-weight: 600;
+        color: #395278;
+    }
+    .repositorio {
+        font-size: 20px;
+        line-height: 31px;
+        color: #6781a8;
+        transition: color 0.2s;
     }
 </style>
